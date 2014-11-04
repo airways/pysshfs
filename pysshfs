@@ -332,9 +332,10 @@ class UI:
         print hfile.name
         hfile.write(Password)
         f = hfile.fileno()
-        os.system('xfce4-terminal -e "echo %s; sshpass -d%s ssh %s@%s -P%s; wait"' % (hfile.fileno(), hfile.fileno(), User, Host, Port))
-        time.sleep(2)
         hfile.close()
+        cmd = 'gnome-terminal -x sh -c "/usr/bin/sshpass -f%s /usr/bin/ssh %s@%s -P%s;read"' % (hfile.name, User, Host, Port)
+        os.system(cmd)
+        time.sleep(2)
         os.remove(hfile.name)
 
     def run(self):
