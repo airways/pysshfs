@@ -23,8 +23,6 @@ import gtk
 import keyring
 import sqlite3dbm.dbm as dbm
 import json
-import tempfile
-import time
 
 ## print debug info ( True / False )
 DEBUG = False
@@ -32,7 +30,7 @@ DEBUG = False
 class UI:
     def __init__(self):
         self.db = dbm.open(os.getenv('HOME') + '/.pysshfs.db', 'c')
-
+        
         # Create window
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title("Mount sshFS")
@@ -148,7 +146,7 @@ class UI:
         table.attach(self.Connect_Bt, 1, 2, 10, 11)
 
         ## Connect
-        self.Connect_SSH_Bt = gtk.Button("SSH")
+        self.Connect_SSH_Bt = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.Connect_SSH_Bt.connect("clicked", self.connect_ssh)
         table.attach(self.Connect_SSH_Bt, 1, 2, 11, 12)
 
@@ -220,7 +218,7 @@ class UI:
         self.Profiles_combo.get_model().clear()
         self.Profiles_combo.insert_text(0, 'New Profile')
 
-
+        
         ind = 1
         for (key,profile) in self.db.items():
             if profile:
@@ -230,7 +228,7 @@ class UI:
                 ind += 1
         # TODO: Find new ID of previously selected item
         self.Profiles_combo.set_active(0)
-
+        
 
     def save_profile(self, widget):
         key = self.Profile_name_entry.get_text()
@@ -245,7 +243,7 @@ class UI:
 
         self.db[key] = json.dumps(new_profile)
         self.update_profiles()
-
+            
     def load_profile(self, widget):
         key = self.Profiles_combo.get_active_text()
         if key == "New Profile":
@@ -301,15 +299,15 @@ class UI:
             debug_info('Error : please check your config')
             show_msg('Error : please check your config')
             return (False, False, False, False, False, False)
-
+        
         return (User, Password, Host, Port, Dir, Mountpoint)
-
+    
     def mount_sshfs(self, widget):
         (User, Password, Host, Port, Dir, Mountpoint) = self.prep_conn()
 
         if not User:
             return
-
+        
         sshfs = sshFs()
         ret = sshfs.mount(User, Password, Host, Dir, Mountpoint, Port)
         self.update_mountedfs()
@@ -327,16 +325,34 @@ class UI:
 
         if not User:
             return
+        
+        #os.system('ssh %s@%s -p%s' % (User, Host, Port))
+        self.ssh(Host, "", 
 
-        hfile = tempfile.NamedTemporaryFile(delete=False)
-        print hfile.name
-        hfile.write(Password)
-        f = hfile.fileno()
-        os.system('xfce4-terminal -e "echo %s; sshpass -d%s ssh %s@%s -P%s; wait"' % (hfile.fileno(), hfile.fileno(), User, Host, Port))
-        time.sleep(2)
-        hfile.close()
-        os.remove(hfile.name)
+    def ssh(host, port, user, password, timeout=30, bg_run=False):                                                                                                 
+        fname = tempfile.mktemp()                                                                                                                                                  
+        fout = open(fname, 'w')                                                                                                                                                    
 
+        options = '-q -oStrictHostKeyChecking=no -oUserKnownHostsFile=/dev/null -oPubkeyAuthentication=no'                                                                         
+        if bg_run:                                                                                                                                                         
+            options += ' -f'                                                                                                                                                       
+        ssh_cmd = 'ssh %s@%s %s -p%s' % (user, host, options, port)                                                                                                                 /
+        child = pexpect.spawn(ssh_cmd, timeout=timeout)                                                                                                                            
+        child.expect(['password: '])                                                                                                                                                                                                                                                                                        
+        child.sendline(password)                                                                                                                                                   
+        child.logfile = fout                                                                                                                                                       
+        child.expect(pexpect.EOF)                                                                                                                                                  
+        child.close()                                                                                                                                                              
+        fout.close()                                                                                                                                                               
+
+        fin = open(fname, 'r')                                                                                                                                                     
+        stdout = fin.read()                                                                                                                                                        
+        fin.close()                                                                                                                                                                
+
+        if 0 != child.exitstatus:                                                                                                                                                  
+            raise Exception(stdout)                                                                                                                                                
+
+        return stdout
     def run(self):
         gtk.main()
 
@@ -350,7 +366,7 @@ class sshFs:
         self.Initial_Responses = ['Are you sure you want to continue connecting (yes/no)?',
                                   'password:', pexpect.EOF]
 
-    def mount(self, User="", Password="", Host="", Dir="", Mountpoint="", Port=22, Timeout=20):
+    def mount(self, User="", Password="", Host="", Dir="", Mountpoint="", Port=22, Timeout=120):
 
         Command = "sshfs -p %s %s@%s:%s %s" % (Port, User, Host, Dir, Mountpoint)
         debug_info("Command : %s" % Command)
@@ -426,7 +442,7 @@ class autofill:
     def set_fill(self, a_user, a_host, a_dir, a_mntpnt, a_port, a_open):
         f = open(os.getenv("HOME") + "/.pysshfs","w")
         f.write("\n".join((a_user, a_host, a_dir, a_mntpnt, a_port, a_open)))
-        f.close()
+        f.close() 
 
 def show_msg(msg=' .. '):
     """  """
