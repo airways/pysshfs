@@ -27,7 +27,7 @@ import tempfile
 import time
 
 ## print debug info ( True / False )
-DEBUG = False
+DEBUG = True
 
 class UI:
     def __init__(self):
@@ -97,37 +97,45 @@ class UI:
         table.attach(label, 0, 1, 4, 5)
         table.attach(self.Password_entry, 1, 2, 4, 5)
 
+        ## Key
+        self.Key_Bt = gtk.Button("...")
+        label = gtk.Label('Key:')
+        label.set_alignment(0, 1)
+        table.attach(label, 0, 1, 5, 6)
+        self.Key_Bt.connect("clicked", self.select_key)
+        table.attach(self.Key_Bt, 1, 2, 5, 6)
+
         ## Host
         self.Host_entry = gtk.Entry()
         label = gtk.Label('Host :')
         self.Host_entry.set_text(a_host)
         label.set_alignment(0, 1)
-        table.attach(label, 0, 1, 5, 6)
-        table.attach(self.Host_entry, 1, 2, 5, 6)
+        table.attach(label, 0, 1, 6, 7)
+        table.attach(self.Host_entry, 1, 2, 6, 7)
 
         ## Dir
         self.Dir_entry = gtk.Entry()
         label = gtk.Label('Dir:')
         self.Dir_entry.set_text(a_dir)
         label.set_alignment(0, 1)
-        table.attach(label, 0, 1, 6, 7)
-        table.attach(self.Dir_entry, 1, 2, 6, 7)
+        table.attach(label, 0, 1, 7, 8)
+        table.attach(self.Dir_entry, 1, 2, 7, 8)
 
         ## Mountpoint
         self.Mountpoint_entry = gtk.Entry()
         label = gtk.Label('Mountpoint:')
         self.Mountpoint_entry.set_text(a_mntpnt)
         label.set_alignment(0, 1)
-        table.attach(label, 0, 1, 7, 8)
-        table.attach(self.Mountpoint_entry, 1, 2, 7, 8)
+        table.attach(label, 0, 1, 8, 9)
+        table.attach(self.Mountpoint_entry, 1, 2, 8, 9)
 
         ## Port
         self.Port_entry = gtk.Entry()
         label = gtk.Label('Port:')
         self.Port_entry.set_text(a_port)
         label.set_alignment(0, 1)
-        table.attach(label, 0, 1, 8, 9)
-        table.attach(self.Port_entry, 1, 2, 8, 9)
+        table.attach(label, 0, 1, 9, 10)
+        table.attach(self.Port_entry, 1, 2, 9, 10)
 
         # Open directory
         self.OpenDir_checkbox = gtk.CheckButton('Open directory')
@@ -135,47 +143,47 @@ class UI:
             self.OpenDir_checkbox.set_active(True)
         else:
             self.OpenDir_checkbox.set_active(False)
-        table.attach(self.OpenDir_checkbox, 0, 1, 9, 10)
+        table.attach(self.OpenDir_checkbox, 0, 1, 10, 11)
 
         ## Save
         self.Save_Bt = gtk.Button(stock=gtk.STOCK_SAVE)
         self.Save_Bt.connect("clicked", self.save_profile)
-        table.attach(self.Save_Bt, 0, 1, 10, 11)
+        table.attach(self.Save_Bt, 0, 1, 11, 12)
 
         ## Connect
         self.Connect_Bt = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.Connect_Bt.connect("clicked", self.mount_sshfs)
-        table.attach(self.Connect_Bt, 1, 2, 10, 11)
+        table.attach(self.Connect_Bt, 1, 2, 11, 12)
 
         ## Connect
         self.Connect_SSH_Bt = gtk.Button("SSH")
         self.Connect_SSH_Bt.connect("clicked", self.connect_ssh)
-        table.attach(self.Connect_SSH_Bt, 1, 2, 11, 12)
+        table.attach(self.Connect_SSH_Bt, 1, 2, 12, 13)
 
         ## Separator
-        table.attach(gtk.HSeparator(), 0, 2, 12, 13)
+        table.attach(gtk.HSeparator(), 0, 2, 13, 14)
 
         ## Label
         label = gtk.Label()
         label.set_markup("<b>Active SSHFS Mountpoints</b>")
         label.set_alignment(0, 1)
-        table.attach(label, 0, 2, 14, 15)
+        table.attach(label, 0, 2, 15, 16)
 
         ## Mounted_FS
         self.Mounted_fs_combo = gtk.combo_box_new_text()
-        table.attach(self.Mounted_fs_combo, 0, 2, 15, 16)
+        table.attach(self.Mounted_fs_combo, 0, 2, 16, 17)
 
         ## Open / Umount
         self.Open_Bt = gtk.Button(stock=gtk.STOCK_OPEN)
         self.Open_Bt.connect("clicked", self.open_mountpoint)
-        table.attach(self.Open_Bt, 0, 1, 16, 17)
+        table.attach(self.Open_Bt, 0, 1, 17, 18)
 
         self.Umount_Bt = gtk.Button(stock=gtk.STOCK_DISCONNECT)
         self.Umount_Bt.connect("clicked", self.umount_sshfs)
-        table.attach(self.Umount_Bt, 1, 2, 16, 17)
+        table.attach(self.Umount_Bt, 1, 2, 17, 18)
 
         ## Separator
-        table.attach(gtk.HSeparator(), 0, 2, 17, 18)
+        table.attach(gtk.HSeparator(), 0, 2, 18, 19)
 
         BoxMain.add(table)
         BoxBase.pack_start(BoxMain, True)
@@ -240,7 +248,8 @@ class UI:
                     'user': self.User_entry.get_text(),
                     'dir': self.Dir_entry.get_text(),
                     'mountpoint': self.Mountpoint_entry.get_text(),
-                    'port': self.Port_entry.get_text()
+                    'port': self.Port_entry.get_text(),
+                    'key': self.Key_Bt.get_label()
                 }
 
         self.db[key] = json.dumps(new_profile)
@@ -255,6 +264,7 @@ class UI:
             self.Dir_entry.set_text("")
             self.Mountpoint_entry.set_text("")
             self.Port_entry.set_text("")
+            self.Key_Bt.set_label("...")
         else:
             if key in self.db:
                 profile = self.db[key]
@@ -265,8 +275,33 @@ class UI:
                 self.Dir_entry.set_text(profile["dir"])
                 self.Mountpoint_entry.set_text(profile["mountpoint"])
                 self.Port_entry.set_text(profile["port"])
+                try:
+                    self.Key_Bt.set_label(profile["key"])
+                except:
+                    self.Key_Bt.set_label("...")
             else:
                 show_msg("Count not find profile "+key)
+
+    def select_key(self, widget):
+        
+        dialog = gtk.FileChooserDialog("Select SSH Private Key",
+                               None,
+                               gtk.FILE_CHOOSER_ACTION_OPEN,
+                               (gtk.STOCK_CANCEL, gtk.RESPONSE_CANCEL,
+                                gtk.STOCK_OPEN, gtk.RESPONSE_OK))
+        dialog.set_default_response(gtk.RESPONSE_OK)
+
+        filter = gtk.FileFilter()
+        filter.set_name("All files")
+        filter.add_pattern("*")
+        dialog.add_filter(filter)
+
+        response = dialog.run()
+        if response == gtk.RESPONSE_OK:
+            self.Key_Bt.set_label(dialog.get_filename())
+        elif response == gtk.RESPONSE_CANCEL:
+            pass
+        dialog.destroy()
 
     def update_mountedfs(self):
         self.mounted_fs_tab = get_mounted_fs()
@@ -288,7 +323,8 @@ class UI:
         if not Password:
             Password = keyring.get_password(Host, User)
 
-        keyring.set_password(Host, User, Password)
+        if Password:
+            keyring.set_password(Host, User, Password)
 
         Mountpoint = os.getenv('HOME') + '/' + self.Mountpoint_entry.get_text()
         if not os.path.exists(Mountpoint):
@@ -302,16 +338,21 @@ class UI:
             show_msg('Error : please check your config')
             return (False, False, False, False, False, False)
 
-        return (User, Password, Host, Port, Dir, Mountpoint)
+        if self.Key_Bt.get_label() != "...":
+            Key = self.Key_Bt.get_label()
+        else:
+            Key = ''
+        
+        return (User, Password, Key, Host, Port, Dir, Mountpoint)
 
     def mount_sshfs(self, widget):
-        (User, Password, Host, Port, Dir, Mountpoint) = self.prep_conn()
+        (User, Password, Key, Host, Port, Dir, Mountpoint) = self.prep_conn()
 
         if not User:
             return
 
         sshfs = sshFs()
-        ret = sshfs.mount(User, Password, Host, Dir, Mountpoint, Port)
+        ret = sshfs.mount(User, Password, Key, Host, Dir, Mountpoint, Port)
         self.update_mountedfs()
 
         if ret[0] == 0:
@@ -323,20 +364,30 @@ class UI:
             show_msg(ret[1])
 
     def connect_ssh(self, widget):
-        (User, Password, Host, Port, Dir, Mountpoint) = self.prep_conn()
+        (User, Password, Key, Host, Port, Dir, Mountpoint) = self.prep_conn()
 
         if not User:
             return
 
-        hfile = tempfile.NamedTemporaryFile(delete=False)
-        print hfile.name
-        hfile.write(Password)
-        f = hfile.fileno()
-        hfile.close()
-        cmd = 'gnome-terminal -x sh -c "/usr/bin/sshpass -f%s /usr/bin/ssh %s@%s -P%s;read"' % (hfile.name, User, Host, Port)
+        cmd = '/usr/bin/ssh %s@%s -P%s' % (User, Host, Port)
+        
+        if Password:
+            hfile = tempfile.NamedTemporaryFile(delete=False)
+            print hfile.name
+            hfile.write(Password)
+            f = hfile.fileno()
+            hfile.close()
+            cmd = '/usr/bin/sshpass -f%s %s' % (hfile.name, cmd)
+        
+        if Key:
+            cmd += ' -i\\"%s\\"' % (Key)
+        
+        cmd = 'gnome-terminal -x sh -c "'+cmd+';read"'
         os.system(cmd)
-        time.sleep(2)
-        os.remove(hfile.name)
+        
+        if Password:
+            time.sleep(2)
+            os.remove(hfile.name)
 
     def run(self):
         gtk.main()
@@ -351,53 +402,62 @@ class sshFs:
         self.Initial_Responses = ['Are you sure you want to continue connecting (yes/no)?',
                                   'password:', pexpect.EOF]
 
-    def mount(self, User="", Password="", Host="", Dir="", Mountpoint="", Port=22, Timeout=20):
+    def mount(self, User="", Password="", Key="", Host="", Dir="", Mountpoint="", Port=22, Timeout=20):
 
-        Command = "sshfs -p %s %s@%s:%s %s" % (Port, User, Host, Dir, Mountpoint)
+        Command = 'sshfs -p %s %s@%s:%s ' % (Port, User, Host, Dir)
+        if Key:
+            Command += ' -o IdentityFile="%s" ' % (Key)
+            #Command += ' -o ssh_command="ssh -i \'%s\'"' % (Key)
+        
+        Command += ' "%s"' % (Mountpoint)
+        
         debug_info("Command : %s" % Command)
 
-        child = pexpect.spawn(Command)
+        if not Password:
+            return (0, os.system(Command))
+        else:
+            child = pexpect.spawn(Command)
 
-        ## Get the first response.
-        ret = child.expect (self.Initial_Responses, Timeout)
-        ## The first reponse is to accept the key.
-        if ret==0:
-            debug_info("The first reponse is to accept the key.")
-            #~ T = child.read(100)
-            child.sendline("yes")
-            child.expect('password:', Timeout)
-            child.sendline(Password)
-        ## The second response sends the password.
-        elif ret == 1:
-            debug_info("The second response sends the password.")
-            child.sendline(Password)
-        # check for ssh bound mount - child exited and exitstatus=0
-        elif child.isalive() == False:
-            if child.exitstatus == 0:
-                return (0, "ssh-bound host mounted")
+            ## Get the first response.
+            ret = child.expect (self.Initial_Responses, Timeout)
+            ## The first reponse is to accept the key.
+            if ret==0:
+                debug_info("The first reponse is to accept the key.")
+                #~ T = child.read(100)
+                child.sendline("yes")
+                child.expect('password:', Timeout)
+                child.sendline(Password)
+            ## The second response sends the password.
+            elif ret == 1:
+                debug_info("The second response sends the password.")
+                child.sendline(Password)
+            # check for ssh bound mount - child exited and exitstatus=0
+            elif child.isalive() == False:
+                if child.exitstatus == 0:
+                    return (0, "ssh-bound host mounted")
+                else:
+                    #this is wierd.. quit
+                    return (-3, 'ERROR: Unknown')
+            ## Otherwise, there is an error.
             else:
-                #this is wierd.. quit
-                return (-3, 'ERROR: Unknown')
-        ## Otherwise, there is an error.
-        else:
-            debug_info("Otherwise, there is an error.")
-            return (-3, 'ERROR: Unknown: ' + str(child.before))
+                debug_info("Otherwise, there is an error.")
+                return (-3, 'ERROR: Unknown: ' + str(child.before))
 
-        ## Get the next response.
-        Possible_Responses = ['password:', pexpect.EOF]
-        ret = child.expect (Possible_Responses, Timeout)
+            ## Get the next response.
+            Possible_Responses = ['password:', pexpect.EOF]
+            ret = child.expect (Possible_Responses, Timeout)
 
-        ## If it asks for a password, error.
-        if ret == 0:
-            debug_info("If it asks for a password, error.")
-            return (-4, 'ERROR: Incorrect password.')
-        elif ret == 1:
-            debug_info("Otherwise we are okay.")
-            return (0, str(child.after))
-            ## Otherwise we are okay.
-        else:
-            debug_info("Otherwise, there is an error.")
-            return (-3, 'ERROR: Unknown: ' + str(child.before))
+            ## If it asks for a password, error.
+            if ret == 0:
+                debug_info("If it asks for a password, error.")
+                return (-4, 'ERROR: Incorrect password.')
+            elif ret == 1:
+                debug_info("Otherwise we are okay.")
+                return (0, str(child.after))
+                ## Otherwise we are okay.
+            else:
+                debug_info("Otherwise, there is an error.")
+                return (-3, 'ERROR: Unknown: ' + str(child.before))
 
 class autofill:
     def __init__(self):
