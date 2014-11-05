@@ -10,7 +10,8 @@
 #   Autofill + ssh-bind mount changes by Anil Gulecha
 #      http://www.gulecha.org
 #
-#   Profile database + keyring integration by Isaac Raway
+#   Profile database, keyring integration, public key auth, sshpass integration
+#       by Isaac Raway
 #       http://metasushi.com
 #
 #   This program is distributed under the terms of the GNU General Public License
