@@ -99,12 +99,16 @@ class UI:
         table.attach(self.Password_entry, 1, 2, 4, 5)
 
         ## Key
+        self.Key_entry = gtk.Entry()
+        self.Key_entry.set_text(a_user)
+        table.attach(self.Key_entry, 1, 2, 5, 6)
+
         self.Key_Bt = gtk.Button("...")
         label = gtk.Label('Key:')
         label.set_alignment(0, 1)
-        table.attach(label, 0, 1, 5, 6)
+        table.attach(label, 0, 1, 6, 7)
         self.Key_Bt.connect("clicked", self.select_key)
-        table.attach(self.Key_Bt, 1, 2, 5, 6)
+        table.attach(self.Key_Bt, 1, 2, 6, 7)
 
         ## Host
         self.Host_entry = gtk.Entry()
@@ -112,31 +116,31 @@ class UI:
         self.Host_entry.set_text(a_host)
         label.set_alignment(0, 1)
         table.attach(label, 0, 1, 6, 7)
-        table.attach(self.Host_entry, 1, 2, 6, 7)
+        table.attach(self.Host_entry, 1, 2, 7, 8)
 
         ## Dir
         self.Dir_entry = gtk.Entry()
         label = gtk.Label('Dir:')
         self.Dir_entry.set_text(a_dir)
         label.set_alignment(0, 1)
-        table.attach(label, 0, 1, 7, 8)
-        table.attach(self.Dir_entry, 1, 2, 7, 8)
+        table.attach(label, 0, 1, 8, 9)
+        table.attach(self.Dir_entry, 1, 2, 8, 9)
 
         ## Mountpoint
         self.Mountpoint_entry = gtk.Entry()
         label = gtk.Label('Mountpoint:')
         self.Mountpoint_entry.set_text(a_mntpnt)
         label.set_alignment(0, 1)
-        table.attach(label, 0, 1, 8, 9)
-        table.attach(self.Mountpoint_entry, 1, 2, 8, 9)
+        table.attach(label, 0, 1, 9, 10)
+        table.attach(self.Mountpoint_entry, 1, 2, 9, 10)
 
         ## Port
         self.Port_entry = gtk.Entry()
         label = gtk.Label('Port:')
         self.Port_entry.set_text(a_port)
         label.set_alignment(0, 1)
-        table.attach(label, 0, 1, 9, 10)
-        table.attach(self.Port_entry, 1, 2, 9, 10)
+        table.attach(label, 0, 1, 10, 11)
+        table.attach(self.Port_entry, 1, 2, 10, 11)
 
         # Open directory
         self.OpenDir_checkbox = gtk.CheckButton('Open directory')
@@ -144,47 +148,47 @@ class UI:
             self.OpenDir_checkbox.set_active(True)
         else:
             self.OpenDir_checkbox.set_active(False)
-        table.attach(self.OpenDir_checkbox, 0, 1, 10, 11)
+        table.attach(self.OpenDir_checkbox, 0, 1, 11, 12)
 
         ## Save
         self.Save_Bt = gtk.Button(stock=gtk.STOCK_SAVE)
         self.Save_Bt.connect("clicked", self.save_profile)
-        table.attach(self.Save_Bt, 0, 1, 11, 12)
+        table.attach(self.Save_Bt, 0, 1, 12, 13)
 
         ## Connect
         self.Connect_Bt = gtk.Button(stock=gtk.STOCK_CONNECT)
         self.Connect_Bt.connect("clicked", self.mount_sshfs)
-        table.attach(self.Connect_Bt, 1, 2, 11, 12)
+        table.attach(self.Connect_Bt, 1, 2, 12, 13)
 
         ## Connect
         self.Connect_SSH_Bt = gtk.Button("SSH")
         self.Connect_SSH_Bt.connect("clicked", self.connect_ssh)
-        table.attach(self.Connect_SSH_Bt, 1, 2, 12, 13)
+        table.attach(self.Connect_SSH_Bt, 1, 2, 13, 14)
 
         ## Separator
-        table.attach(gtk.HSeparator(), 0, 2, 13, 14)
+        table.attach(gtk.HSeparator(), 0, 2, 14, 15)
 
         ## Label
         label = gtk.Label()
         label.set_markup("<b>Active SSHFS Mountpoints</b>")
         label.set_alignment(0, 1)
-        table.attach(label, 0, 2, 15, 16)
+        table.attach(label, 0, 2, 16, 17)
 
         ## Mounted_FS
         self.Mounted_fs_combo = gtk.combo_box_new_text()
-        table.attach(self.Mounted_fs_combo, 0, 2, 16, 17)
+        table.attach(self.Mounted_fs_combo, 0, 2, 17, 18)
 
         ## Open / Umount
         self.Open_Bt = gtk.Button(stock=gtk.STOCK_OPEN)
         self.Open_Bt.connect("clicked", self.open_mountpoint)
-        table.attach(self.Open_Bt, 0, 1, 17, 18)
+        table.attach(self.Open_Bt, 0, 1, 18, 19)
 
         self.Umount_Bt = gtk.Button(stock=gtk.STOCK_DISCONNECT)
         self.Umount_Bt.connect("clicked", self.umount_sshfs)
-        table.attach(self.Umount_Bt, 1, 2, 17, 18)
+        table.attach(self.Umount_Bt, 1, 2, 18, 19)
 
         ## Separator
-        table.attach(gtk.HSeparator(), 0, 2, 18, 19)
+        table.attach(gtk.HSeparator(), 0, 2, 19, 20)
 
         BoxMain.add(table)
         BoxBase.pack_start(BoxMain, True)
@@ -250,7 +254,7 @@ class UI:
                     'dir': self.Dir_entry.get_text(),
                     'mountpoint': self.Mountpoint_entry.get_text(),
                     'port': self.Port_entry.get_text(),
-                    'key': self.Key_Bt.get_label()
+                    'key': self.Key_entry.get_text()
                 }
 
         self.db[key] = json.dumps(new_profile)
@@ -265,7 +269,7 @@ class UI:
             self.Dir_entry.set_text("")
             self.Mountpoint_entry.set_text("")
             self.Port_entry.set_text("")
-            self.Key_Bt.set_label("...")
+            self.Key_entry.set_text("")
         else:
             if key in self.db:
                 profile = self.db[key]
@@ -277,9 +281,9 @@ class UI:
                 self.Mountpoint_entry.set_text(profile["mountpoint"])
                 self.Port_entry.set_text(profile["port"])
                 try:
-                    self.Key_Bt.set_label(profile["key"])
+                    self.Key_entry.set_text(profile["key"])
                 except:
-                    self.Key_Bt.set_label("...")
+                    self.Key_entry.set_text("")
             else:
                 show_msg("Count not find profile "+key)
 
@@ -299,7 +303,7 @@ class UI:
 
         response = dialog.run()
         if response == gtk.RESPONSE_OK:
-            self.Key_Bt.set_label(dialog.get_filename())
+            self.Key_entry.set_text(dialog.get_filename())
         elif response == gtk.RESPONSE_CANCEL:
             pass
         dialog.destroy()
@@ -339,10 +343,7 @@ class UI:
             show_msg('Error : please check your config')
             return (False, False, False, False, False, False)
 
-        if self.Key_Bt.get_label() != "...":
-            Key = self.Key_Bt.get_label()
-        else:
-            Key = ''
+        Key = self.Key_entry.get_text()
         
         return (User, Password, Key, Host, Port, Dir, Mountpoint)
 
@@ -370,7 +371,7 @@ class UI:
         if not User:
             return
 
-        cmd = '/usr/bin/ssh %s@%s -P%s' % (User, Host, Port)
+        cmd = '/usr/bin/ssh %s@%s -p%s' % (User, Host, Port)
         
         if Password:
             hfile = tempfile.NamedTemporaryFile(delete=False)
