@@ -229,7 +229,7 @@ class UI:
             return
         else:
             os.system('fusermount -u %s' % self.Mounted_fs_combo.get_active_text())
-            os.system('rmdir %s' % self.Mounted_fs_combo.get_active_text())
+            #os.system('rmdir %s' % self.Mounted_fs_combo.get_active_text())
             self.update_mountedfs()
 
     def update_profiles(self):
@@ -364,8 +364,8 @@ class UI:
             keyring.set_password(Host, User, Password)
 
         Mountpoint = os.getenv('HOME') + '/' + self.Mountpoint_entry.get_text()
-        #if not os.path.exists(Mountpoint):
-        #    os.mkdir(Mountpoint)
+        if not os.path.exists(Mountpoint):
+            os.mkdir(Mountpoint)
 
         Port = self.Port_entry.get_text()
 
@@ -436,14 +436,14 @@ class sshFs:
     def __init__(self):
         ## Three responses we might expect.
         self.Initial_Responses = ['Are you sure you want to continue connecting (yes/no)?',
-                                  'password:', pexpect.EOF]
+                                  '(?i)password:', pexpect.EOF]
 
     def mount(self, User="", Password="", Key="", Host="", Dir="", Mountpoint="", Port=22, Timeout=20):
 
         Command = 'sshfs -p %s %s@%s:%s ' % (Port, User, Host, Dir)
         if Key:
             Command += ' -o IdentityFile="%s" ' % (Key)
-            #Command += ' -o ssh_command="ssh -i \'%s\'"' % (Key)
+            Command += ' -o ssh_command="ssh -i \'%s\'"' % (Key)
         
         Command += ' "%s"' % (Mountpoint)
         
