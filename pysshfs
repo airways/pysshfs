@@ -364,8 +364,8 @@ class UI:
             keyring.set_password(Host, User, Password)
 
         Mountpoint = os.getenv('HOME') + '/' + self.Mountpoint_entry.get_text()
-        if not os.path.exists(Mountpoint):
-            os.mkdir(Mountpoint)
+        #if not os.path.exists(Mountpoint):
+        #    os.mkdir(Mountpoint)
 
         Port = self.Port_entry.get_text()
 
