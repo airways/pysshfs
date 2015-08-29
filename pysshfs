@@ -33,7 +33,7 @@ DEBUG = True
 class UI:
     def __init__(self):
         self.db = dbm.open(os.getenv('HOME') + '/.pysshfs.db', 'c')
-
+        
         # Create window
         self.window = gtk.Window(gtk.WINDOW_TOPLEVEL)
         self.window.set_title("Mount sshFS")
@@ -64,7 +64,7 @@ class UI:
         table.set_row_spacings(5)
         table.set_col_spacings(5)
 
-        ## Mounted_FS
+        ## Profiles
         self.Profiles_combo = gtk.combo_box_new_text()
         table.attach(self.Profiles_combo, 0, 2, 1, 2)
 
@@ -106,7 +106,7 @@ class UI:
         self.Key_Bt = gtk.Button("...")
         label = gtk.Label('Key:')
         label.set_alignment(0, 1)
-        table.attach(label, 0, 1, 6, 7)
+        table.attach(label, 0, 1, 5, 6)
         self.Key_Bt.connect("clicked", self.select_key)
         table.attach(self.Key_Bt, 1, 2, 6, 7)
 
@@ -115,7 +115,7 @@ class UI:
         label = gtk.Label('Host :')
         self.Host_entry.set_text(a_host)
         label.set_alignment(0, 1)
-        table.attach(label, 0, 1, 6, 7)
+        table.attach(label, 0, 1, 7, 8)
         table.attach(self.Host_entry, 1, 2, 7, 8)
 
         ## Dir
@@ -154,6 +154,11 @@ class UI:
         self.Save_Bt = gtk.Button(stock=gtk.STOCK_SAVE)
         self.Save_Bt.connect("clicked", self.save_profile)
         table.attach(self.Save_Bt, 0, 1, 12, 13)
+
+        ## Delete
+        self.Delete_Bt = gtk.Button(stock=gtk.STOCK_DELETE)
+        self.Delete_Bt.connect("clicked", self.delete_profile)
+        table.attach(self.Delete_Bt, 0, 1, 13, 14)
 
         ## Connect
         self.Connect_Bt = gtk.Button(stock=gtk.STOCK_CONNECT)
@@ -233,11 +238,19 @@ class UI:
         self.Profiles_combo.get_model().clear()
         self.Profiles_combo.insert_text(0, 'New Profile')
 
-
-        ind = 1
+        sorted = []
+        
         for (key,profile) in self.db.items():
+            sorted.append(key)
+        
+        sorted.sort();
+        
+        
+        ind = 1
+        for key in sorted:
+            profile = self.db[key]
             if profile:
-                print key+"="+profile
+                #print key+"="+profile
                 profile = json.loads(profile)
                 self.Profiles_combo.insert_text(ind, profile["name"])
                 ind += 1
@@ -259,6 +272,18 @@ class UI:
 
         self.db[key] = json.dumps(new_profile)
         self.update_profiles()
+        
+        pw = self.Password_entry.get_text()
+        if new_profile['host'] and new_profile['user'] and pw and pw != "******":
+            keyring.set_password(new_profile['host'], new_profile['user'], pw)
+        
+        
+    def delete_profile(self, widget):
+        key = self.Profiles_combo.get_active_text()
+        if key != "New Profile":
+            del self.db[key]
+            self.update_profiles()
+        
 
     def load_profile(self, widget):
         key = self.Profiles_combo.get_active_text()
@@ -270,23 +295,30 @@ class UI:
             self.Mountpoint_entry.set_text("")
             self.Port_entry.set_text("")
             self.Key_entry.set_text("")
+            self.Password_entry.set_text("")
         else:
             if key in self.db:
                 profile = self.db[key]
                 profile = json.loads(profile)
+                #print profile
                 self.Profile_name_entry.set_text(profile["name"])
                 self.Host_entry.set_text(profile["host"])
                 self.User_entry.set_text(profile["user"])
                 self.Dir_entry.set_text(profile["dir"])
                 self.Mountpoint_entry.set_text(profile["mountpoint"])
                 self.Port_entry.set_text(profile["port"])
+                if keyring.get_password(profile["host"], profile["user"]):
+                    self.Password_entry.set_text("******")
+                else:
+                    self.Password_entry.set_text("")
+                
                 try:
                     self.Key_entry.set_text(profile["key"])
                 except:
                     self.Key_entry.set_text("")
             else:
                 show_msg("Count not find profile "+key)
-
+    
     def select_key(self, widget):
         
         dialog = gtk.FileChooserDialog("Select SSH Private Key",
@@ -325,10 +357,10 @@ class UI:
         Host = self.Host_entry.get_text()
         Dir = self.Dir_entry.get_text()
 
-        if not Password:
+        if not Password or Password == "******":
             Password = keyring.get_password(Host, User)
 
-        if Password:
+        if Host and User and Password and Password != "******":
             keyring.set_password(Host, User, Password)
 
         Mountpoint = os.getenv('HOME') + '/' + self.Mountpoint_entry.get_text()
@@ -375,7 +407,7 @@ class UI:
         
         if Password:
             hfile = tempfile.NamedTemporaryFile(delete=False)
-            print hfile.name
+            #print hfile.name
             hfile.write(Password)
             f = hfile.fileno()
             hfile.close()
@@ -384,7 +416,9 @@ class UI:
         if Key:
             cmd += ' -i\\"%s\\"' % (Key)
         
-        cmd = 'gnome-terminal -x sh -c "'+cmd+';read"'
+        #cmd = 'gnome-terminal -x sh -c "'+cmd+';read"'
+        cmd = 'konsole --hold -e /bin/sh -c "'+cmd+';read"'
+        print cmd
         os.system(cmd)
         
         if Password:
